@@ -57,6 +57,7 @@ class RandomPitch(Transform):
     def __init__(self, n_signal, pitch_range = [0.7, 1.3], sr: int = 44100, max_factor: int = 20, prob: float = 0.5):
         self.n_signal = n_signal
         self.pitch_range = pitch_range
+        self.halfstep_range = [np.round(12*np.log2(x)) for x in pitch_range]
         self.factor_list, self.ratio_list = self._get_factors(max_factor, pitch_range)
         self.sr = sr
         self.prob = prob
@@ -79,14 +80,15 @@ class RandomPitch(Transform):
         perform_pitch = bool(torch.bernoulli(torch.tensor(self.prob)))
         if not perform_pitch:
             return x
-        random_range = list(self.pitch_range)
-        random_range[1] = min(random_range[1], x.shape[-1] / self.n_signal)
-        random_pitch = random() * (random_range[1] - random_range[0]) + random_range[0]
         try:
             import pyrubberband as pyrb
-            s = 12*np.log2(random_pitch)
+            # Shift to within a random quarterstep within the chosen interval
+            s = float(np.random.randint(self.halfstep_range[0], self.halfstep_range[1])) + 0.5*np.random.randint(2)
             x_pitched = pyrb.pitch_shift(x.T, self.sr, s).T
         except:
+            random_range = list(self.pitch_range)
+            random_range[1] = min(random_range[1], x.shape[-1] / self.n_signal)
+            random_pitch = random() * (random_range[1] - random_range[0]) + random_range[0]
             ratio_idx = bisect.bisect_left(self.factor_list, random_pitch)
             if ratio_idx == len(self.factor_list):
                 ratio_idx -= 1
