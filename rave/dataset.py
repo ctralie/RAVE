@@ -210,6 +210,7 @@ def get_dataset(db_path,
                 derivative: bool = False,
                 normalize: bool = False,
                 rand_pitch: bool = False,
+                rand_pitch_prob: float = 0.5,
                 augmentations: Union[None, Iterable[Callable]] = None, 
                 n_channels: int = 1):
     if db_path[:4] == "http":
@@ -233,7 +234,7 @@ def get_dataset(db_path,
     if rand_pitch:
         rand_pitch = list(map(float, rand_pitch))
         assert len(rand_pitch) == 2, "rand_pitch must be given two floats"
-        transform_list.insert(1, transforms.RandomPitch(n_signal, rand_pitch, sr))
+        transform_list.insert(1, transforms.RandomPitch(n_signal, rand_pitch, sr, prob=rand_pitch_prob))
 
     if sr_dataset != sr:
         transform_list.append(transforms.Resample(sr_dataset, sr))

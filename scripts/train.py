@@ -67,6 +67,9 @@ flags.DEFINE_bool('normalize',
 flags.DEFINE_list('rand_pitch',
                   default=None,
                   help='activates random pitch')
+flags.DEFINE_float('rand_pitch_prob',
+                  default=0.5,
+                  help='Probability of applying pitch augmentation')
 flags.DEFINE_float('ema',
                    default=None,
                    help='Exponential weight averaging factor (optional)')
@@ -167,6 +170,7 @@ def main(argv):
                                        derivative=FLAGS.derivative,
                                        normalize=FLAGS.normalize,
                                        rand_pitch=FLAGS.rand_pitch,
+                                       rand_pitch_prob=FLAGS.rand_pitch_prob,
                                        n_channels=n_channels)
     train, val = rave.dataset.split_dataset(dataset, 98)
 
